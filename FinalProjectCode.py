@@ -15,6 +15,10 @@ def Asteroids():
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib.animation import FuncAnimation
+    import astropy.time as time
+    import astropy.coordinates as coord
+    from astropy.coordinates import solar_system_ephemeris
+    from astropy import units as u
 
 
     G = 6.674e-11
@@ -22,12 +26,16 @@ def Asteroids():
     m_sun = 1.989e30
 
 #info Jupiter
-    ecc_jup = 0.0489
-    semimajor_jup = 5.2044
-    a_jup = semimajor_jup
-    perihelion_jup = a_jup*(1-ecc_jup)
     m_jup = 1.8982e27
-    vp_jup = math.sqrt(GMs) * math.sqrt((1+ecc_jup) / (a_jup*(1-ecc_jup)) * (1+(m_jup/m_sun)))
+    # 使用JPL历表获取木星的初始位置和速度
+    solar_system_ephemeris.set('jpl')
+    t = time.Time('J2000', format='jyear')
+    jupiter_pos, jupiter_vel = coord.get_body_barycentric_posvel('jupiter', t)
+    # 转换为AU和AU/year
+    x2 = jupiter_pos.x.to(u.au).value
+    y2 = jupiter_pos.y.to(u.au).value
+    vx2 = jupiter_vel.x.to(u.au/u.year).value
+    vy2 = jupiter_vel.y.to(u.au/u.year).value
 
 
 #info Asteroids
@@ -66,11 +74,7 @@ def Asteroids():
         vy=np.append(vy,astr_vy)
         semimajor_a=np.append(semimajor_a,semimajor_a1)
 
-   #initial parameters for Jupiter
-    vx2 = 0
-    vy2 = vp_jup
-    x2 = -perihelion_jup
-    y2 = 0
+
 
    # steps and time (in years)
     h = 1e-2
